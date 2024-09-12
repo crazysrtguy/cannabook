@@ -89,11 +89,11 @@ export const UI = () => {
         <div className="relative">
           <div className="bg-white/0  animate-horizontal-scroll flex items-center gap-8 w-max px-8">
             <h1 className="shrink-0 text-white text-10xl font-black ">
-ALLY           </h1>
+CannaVerse           </h1>
             <h2 className="shrink-0 text-white text-8xl italic font-light">
-Community            </h2>
+  META          </h2>
             <h2 className="shrink-0 text-white text-12xl font-bold">
-             META
+Community
             </h2>
             <h2 className="shrink-0 text-transparent text-12xl font-bold italic outline-text">
 is            </h2>
