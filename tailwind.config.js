@@ -1,6 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./public/**/*.{html,js}", // Optionally include public folder files if needed
+  ],
+  theme: {
   theme: {
     fontFamily: {
       sans: ["Poppins", "sans-serif"],
