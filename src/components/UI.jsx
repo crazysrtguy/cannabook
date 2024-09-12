@@ -104,11 +104,10 @@ is            </h2>
               the
             </h2>
             <h2 className="shrink-0 text-white text-13xl font-bold">
-              way
+              way to
             </h2>
             <h2 className="shrink-0 text-transparent text-13xl font-bold outline-text italic">
-              to
-            </h2>
+TAKE OVER            </h2>
           </div>
           <div className="absolute top 50 left-0 bg-white/0 animate-horizontal-scroll-2 flex items-center gap-18 px-8 w-max">
             <h2 className="shrink-0 text-white text-10xl font-black ">
