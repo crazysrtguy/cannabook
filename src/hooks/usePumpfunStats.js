@@ -2,10 +2,24 @@ import { useEffect, useRef, useState } from "react";
 
 const POLL_INTERVAL_MS = 30000;
 
-// Polls cannabook's own /api/pumpfun/stats proxy for live $GOONIFY holder
-// count and market cap (sourced from pump.fun and DexScreener respectively).
+const DEFAULT_STATS = {
+  holders: null,
+  snipers: null,
+  bundlers: null,
+  devHolding: null,
+  marketCap: null,
+  trades24h: null,
+  priceChangeH24: null,
+  pairAddress: null,
+  chainId: null,
+};
+
+// Polls cannabook's own /api/pumpfun/stats proxy for live $GOONIFY stats
+// (holders, sniper/bundler breakdown, dev-holding flag from pump.fun; market
+// cap, 24h trades, 24h price change and the DexScreener pair id for the
+// chart embed, from DexScreener).
 export function usePumpfunStats() {
-  const [stats, setStats] = useState({ holders: null, marketCap: null });
+  const [stats, setStats] = useState(DEFAULT_STATS);
   const cancelledRef = useRef(false);
 
   useEffect(() => {
@@ -17,7 +31,7 @@ export function usePumpfunStats() {
         if (!res.ok) return;
         const data = await res.json();
         if (cancelledRef.current) return;
-        setStats({ holders: data.holders ?? null, marketCap: data.marketCap ?? null });
+        setStats({ ...DEFAULT_STATS, ...data });
       } catch {
         // transient network/API failure - keep the last known values and retry next tick
       }

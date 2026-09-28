@@ -21,6 +21,12 @@ function formatCompact(n) {
   return `${value.toFixed(1)}${units[unitIndex]}`;
 }
 
+function formatSignedPct(n) {
+  if (n == null || Number.isNaN(n)) return "—";
+  const sign = n > 0 ? "+" : "";
+  return `${sign}${n.toFixed(1)}%`;
+}
+
 const pageStyles = `
   .landing-root{
     --bg:#0a0a0c;
@@ -58,17 +64,29 @@ const pageStyles = `
   .landing-root .upzone{transition:border-color .15s,background .15s}
   .landing-root .upzone:hover{border-color:var(--yellow);background:var(--yellow-soft)}
   .landing-root .wrap{max-width:1240px;margin:0 auto;padding-left:24px;padding-right:24px}
+  .landing-root .dex-embed{position:relative;width:100%;padding-bottom:56%;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .landing-root .dex-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   @media (max-width:900px){
     .landing-root .grid-4{grid-template-columns:repeat(2,1fr) !important}
     .landing-root .grid-3{grid-template-columns:1fr !important}
     .landing-root .hero{flex-direction:column}
+    .landing-root .dex-embed{padding-bottom:130%}
   }
 `;
 
 export const Landing = () => {
   const [copyLabel, setCopyLabel] = useState("FovbmorCWsm...ZpGpump");
   const goonifyImages = useGoonifyFeed();
-  const { holders, marketCap } = usePumpfunStats();
+  const {
+    holders,
+    marketCap,
+    snipers,
+    bundlers,
+    trades24h,
+    priceChangeH24,
+    pairAddress,
+    chainId,
+  } = usePumpfunStats();
 
   const copyCA = () => {
     if (navigator.clipboard) {
@@ -169,16 +187,53 @@ export const Landing = () => {
       {/* stat strip */}
       <div className="wrap grid-4" style={{ position: "relative", zIndex: 10, marginTop: 12, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
         {[
-          [formatCompact(goonifyImages.length), "GOONIFICATIONS"],
-          [formatCompact(holders), "HOLDERS"],
-          ["24/7", "GOONING"],
-          [marketCap == null ? "—" : `$${formatCompact(marketCap)}`, "MARKETCAP"],
-        ].map(([value, label]) => (
+          { value: formatCompact(goonifyImages.length), label: "GOONIFICATIONS" },
+          { value: formatCompact(holders), label: "HOLDERS" },
+          { value: "24/7", label: "GOONING" },
+          { value: marketCap == null ? "—" : `$${formatCompact(marketCap)}`, label: "MARKETCAP" },
+          { value: formatCompact(trades24h), label: "24H TRADES" },
+          {
+            value: formatSignedPct(priceChangeH24),
+            label: "24H CHANGE",
+            color:
+              priceChangeH24 == null
+                ? "var(--yellow)"
+                : priceChangeH24 >= 0
+                ? "var(--yellow)"
+                : "var(--hot)",
+          },
+          { value: formatCompact(snipers), label: "SNIPERS" },
+          { value: formatCompact(bundlers), label: "BUNDLERS" },
+        ].map(({ value, label, color }) => (
           <div key={label} className="card-hover" style={{ background: "var(--bg-raised)", border: "1px solid var(--line)", borderRadius: 14, padding: 20 }}>
-            <div className="disp" style={{ fontSize: 28, color: "var(--yellow)" }}>{value}</div>
+            <div className="disp" style={{ fontSize: 28, color: color ?? "var(--yellow)" }}>{value}</div>
             <div className="mono" style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>{label}</div>
           </div>
         ))}
+      </div>
+      <p className="wrap mono" style={{ position: "relative", zIndex: 10, fontSize: 10, color: "var(--muted)", marginTop: 10 }}>
+        holders, snipers &amp; bundlers from pump.fun · trades, change &amp; market cap from DexScreener · refreshes every 30s
+      </p>
+
+      {/* live chart */}
+      <div className="wrap" style={{ position: "relative", zIndex: 10, marginTop: 40 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 20 }}>
+          <h2 className="disp" style={{ fontSize: "clamp(22px,2.6vw,32px)", margin: 0 }}>LIVE CHART</h2>
+          <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
+          <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>DEXSCREENER</span>
+        </div>
+        {pairAddress ? (
+          <div className="dex-embed">
+            <iframe
+              title="$GOONIFY chart"
+              src={`https://dexscreener.com/${chainId ?? "solana"}/${pairAddress}?embed=1&loadChartSettings=0&trades=0&tabs=0&info=0&chartLeftToolbar=0&theme=dark&chartTheme=dark&chartStyle=1&chartType=usd&interval=15`}
+            />
+          </div>
+        ) : (
+          <div className="dex-embed" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-card)" }}>
+            <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>loading chart…</span>
+          </div>
+        )}
       </div>
 
       {/* how it works */}
