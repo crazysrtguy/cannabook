@@ -74,9 +74,18 @@ const pageStyles = `
   }
 `;
 
+const GALLERY_PAGE_SIZE = 8;
+
 export const Landing = () => {
   const [copyLabel, setCopyLabel] = useState("FovbmorCWsm...ZpGpump");
   const goonifyImages = useGoonifyFeed();
+  const [galleryPage, setGalleryPage] = useState(0);
+  const galleryPageCount = Math.max(1, Math.ceil(goonifyImages.length / GALLERY_PAGE_SIZE));
+  const clampedGalleryPage = Math.min(galleryPage, galleryPageCount - 1);
+  const galleryItems = goonifyImages.slice(
+    clampedGalleryPage * GALLERY_PAGE_SIZE,
+    clampedGalleryPage * GALLERY_PAGE_SIZE + GALLERY_PAGE_SIZE
+  );
   const {
     holders,
     marketCap,
@@ -279,32 +288,71 @@ export const Landing = () => {
         <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 44 }}>
           <h2 className="disp" style={{ fontSize: "clamp(28px,3.4vw,44px)", margin: 0 }}>COMMUNITY GALLERY</h2>
           <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
-          <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>PLACEHOLDER PREVIEW</span>
+          <span className="mono" style={{ fontSize: 12, color: "var(--yellow)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--yellow)", animation: "gb-pulse 1.4s ease-in-out infinite" }} />
+            LIVE
+          </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", background: "var(--bg-card)", border: "1px solid var(--yellow)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
           <div>
             <div className="disp" style={{ fontSize: 15, color: "var(--yellow)", marginBottom: 4 }}>📖 THE GOONING BIBLE</div>
-            <p className="mono" style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>a living 3D book — every public goonification lands as a new page, automatically, gilded page edges and all.</p>
+            <p className="mono" style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>a living 3D book — every public goonification lands as a new page here and in the gallery below, automatically, gilded page edges and all.</p>
           </div>
           <Link to="/bible" className="disp btn-primary" style={{ background: "var(--yellow)", color: "var(--ink)", padding: "14px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13, whiteSpace: "nowrap", boxShadow: "4px 4px 0 #000" }}>OPEN THE BIBLE →</Link>
         </div>
-        <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
-          {[
-            ["30% 30%", "#3a3620", "var(--yellow)", "M7 15c1.5 2 8.5 2 10 0"],
-            ["70% 30%", "#402b16", "var(--hot)", "M6 15q6 5 12 0"],
-            ["30% 70%", "#26382e", "var(--yellow)", "M7 16c1.5-2 8.5-2 10 0"],
-            ["70% 70%", "#37263c", "var(--hot)", "M6 15q6 6 12 0"],
-          ].map(([pos, tint, stroke, mouth], i) => (
-            <div key={i} className="card-hover" style={{ aspectRatio: "1", borderRadius: 16, border: "1px solid var(--line)", background: `radial-gradient(circle at ${pos},${tint},#0a0a0c 70%)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="46" height="46" viewBox="0 0 24 24">
-                <circle cx="8" cy="10" r="1.6" fill={stroke} />
-                <circle cx="16" cy="10" r="1.6" fill={stroke} />
-                <path d={mouth} stroke={stroke} strokeWidth="1.6" fill="none" strokeLinecap="round" />
-              </svg>
+
+        {galleryItems.length === 0 ? (
+          <div style={{ border: "1px dashed var(--line)", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
+            <p className="mono" style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>no goonifications yet — be the first one in the gallery.</p>
+            <a href="#goonificator" className="disp btn-primary" style={{ display: "inline-block", marginTop: 16, background: "var(--yellow)", color: "var(--ink)", padding: "12px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13 }}>GOONIFY ME →</a>
+          </div>
+        ) : (
+          <>
+            <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+              {galleryItems.map((src, i) => (
+                <a
+                  key={`${clampedGalleryPage}-${i}-${src}`}
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="card-hover"
+                  style={{ display: "block", aspectRatio: "1", borderRadius: 16, border: "1px solid var(--line)", overflow: "hidden", background: "var(--bg-card)" }}
+                >
+                  <img
+                    src={src}
+                    alt="goonified generation"
+                    loading="lazy"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  />
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="mono" style={{ fontSize: 11, color: "var(--muted)", marginTop: 16 }}>real generations populate this grid live once wired up — shown here as placeholder tiles, not real user images.</p>
+
+            {galleryPageCount > 1 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 24 }}>
+                <button
+                  onClick={() => setGalleryPage((p) => Math.max(0, p - 1))}
+                  disabled={clampedGalleryPage === 0}
+                  className="mono btn-ghost"
+                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage === 0 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage === 0 ? "default" : "pointer", fontSize: 12 }}
+                >
+                  ← PREV
+                </button>
+                <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>
+                  PAGE {clampedGalleryPage + 1} / {galleryPageCount}
+                </span>
+                <button
+                  onClick={() => setGalleryPage((p) => Math.min(galleryPageCount - 1, p + 1))}
+                  disabled={clampedGalleryPage >= galleryPageCount - 1}
+                  className="mono btn-ghost"
+                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage >= galleryPageCount - 1 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage >= galleryPageCount - 1 ? "default" : "pointer", fontSize: 12 }}
+                >
+                  NEXT →
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* CTA band */}
