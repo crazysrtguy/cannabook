@@ -21,10 +21,40 @@ function formatCompact(n) {
   return `${value.toFixed(1)}${units[unitIndex]}`;
 }
 
+const SHARE_TEXT = "I just got goonified 😭 $GOONIFY";
+
 function buildShareUrl(imageSrc) {
   const absoluteImageUrl = new URL(imageSrc, window.location.origin).toString();
-  const text = "I just got goonified 😭 $GOONIFY";
-  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(absoluteImageUrl)}`;
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(absoluteImageUrl)}`;
+}
+
+// Tries to hand the real image file to the OS share sheet (so picking X/Twitter
+// there attaches the actual photo, not just a link) - falls back to opening
+// X's web compose intent when file sharing isn't supported (most desktops).
+async function shareGoonification(imageSrc) {
+  const absoluteImageUrl = new URL(imageSrc, window.location.origin).toString();
+
+  if (navigator.share) {
+    try {
+      const res = await fetch(absoluteImageUrl);
+      const blob = await res.blob();
+      const ext = blob.type.split("/")[1]?.split("+")[0] || "png";
+      const file = new File([blob], `goonified.${ext}`, { type: blob.type || "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: SHARE_TEXT });
+        return;
+      }
+
+      await navigator.share({ text: SHARE_TEXT, url: absoluteImageUrl });
+      return;
+    } catch (err) {
+      if (err?.name === "AbortError") return;
+      // fall through to the link-based fallback below
+    }
+  }
+
+  window.open(buildShareUrl(imageSrc), "_blank", "noopener,noreferrer");
 }
 
 const pageStyles = `
@@ -224,16 +254,21 @@ export const Landing = () => {
                       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     />
                   </a>
-                  <a
-                    href={buildShareUrl(src)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Post to X"
-                    title="Post to X"
-                    style={{ position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: 8, background: "rgba(10,10,12,0.75)", border: "1px solid var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  <button
+                    type="button"
+                    onClick={() => shareGoonification(src)}
+                    aria-label="Share"
+                    title="Share (attaches the image on supported devices)"
+                    style={{ position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: 8, background: "rgba(10,10,12,0.75)", border: "1px solid var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
                   >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--yellow)"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.6L4.4 22H1.3l8.1-9.3L1 2h7.1l4.9 6.1L18.9 2z" /></svg>
-                  </a>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3" />
+                      <circle cx="6" cy="12" r="3" />
+                      <circle cx="18" cy="19" r="3" />
+                      <line x1="8.6" y1="10.6" x2="15.4" y2="6.4" />
+                      <line x1="8.6" y1="13.4" x2="15.4" y2="17.6" />
+                    </svg>
+                  </button>
                 </div>
               ))}
             </div>
