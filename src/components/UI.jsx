@@ -1,7 +1,8 @@
-import { atom, useAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
+import { useGoonifyFeed } from "../hooks/useGoonifyFeed";
 
-const pictures = [
+const staticPictures = [
   "1",
   "2",
   "3",
@@ -20,27 +21,63 @@ const pictures = [
   "16",
 ];
 
+// Local curated pages resolve to /textures/<id>.jpg. Live goonify
+// generations arrive as full proxied URLs and are used as-is.
+export const resolveTextureSrc = (id) =>
+  typeof id === "string" && (id.startsWith("/api/") || id.startsWith("http"))
+    ? id
+    : `/textures/${id}.jpg`;
+
 export const pageAtom = atom(0);
-export const pages = [
-  {
-    front: "17",
-    back: pictures[0],
-  },
-];
-for (let i = 1; i < pictures.length - 1; i += 2) {
-  pages.push({
-    front: pictures[i % pictures.length],
-    back: pictures[(i + 1) % pictures.length],
-  });
+
+// Holds the live goonify.fun generations (newest last), appended after the
+// curated static pictures. Populated by the polling effect in UI below.
+export const goonifyPicturesAtom = atom([]);
+
+// Builds book leaves from a flat picture list. Unlike a fixed-size deck,
+// `pictures` grows one item at a time as new goonify generations arrive, so
+// this can't assume an even count the way the original template did - it
+// pairs everything strictly once (no picture reused/dropped) and only ever
+// falls back to the back-cover texture as filler, never duplicates content.
+function buildPages(pictures) {
+  if (pictures.length === 0) {
+    return [{ front: "17", back: "18" }];
+  }
+
+  const pages = [{ front: "17", back: pictures[0] }];
+
+  const middle = pictures.slice(1, pictures.length - 1);
+  for (let i = 0; i < middle.length; i += 2) {
+    pages.push({
+      front: middle[i],
+      back: middle[i + 1] ?? "18",
+    });
+  }
+
+  if (pictures.length > 1) {
+    pages.push({
+      front: pictures[pictures.length - 1],
+      back: "18",
+    });
+  }
+  return pages;
 }
 
-pages.push({
-  front: pictures[pictures.length - 1],
-  back: "18",
-});
+export const pagesAtom = atom((get) =>
+  buildPages([...staticPictures, ...get(goonifyPicturesAtom)])
+);
 
 export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
+  const pages = useAtomValue(pagesAtom);
+  const goonifyImages = useGoonifyFeed();
+  const setGoonifyPictures = useSetAtom(goonifyPicturesAtom);
+
+  useEffect(() => {
+    // feed is newest-first; reverse so the newest generation lands as the
+    // last page of the book (right before the back cover)
+    setGoonifyPictures([...goonifyImages].reverse());
+  }, [goonifyImages, setGoonifyPictures]);
 
   useEffect(() => {
     const audio = new Audio("/audios/page-flip-01a.mp3");

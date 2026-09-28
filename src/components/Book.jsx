@@ -1,6 +1,6 @@
 import { useCursor, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { easing } from "maath";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -17,7 +17,7 @@ import {
   Vector3,
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
-import { pageAtom, pages } from "./UI";
+import { pageAtom, pagesAtom, resolveTextureSrc } from "./UI";
 
 const easingFactor = 0.5; // Controls the speed of the easing
 const easingFactorFold = 0.3; // Controls the speed of the easing
@@ -85,17 +85,22 @@ const pageMaterials = [
   }),
 ];
 
-pages.forEach((page) => {
-  useTexture.preload(`/textures/${page.front}.jpg`);
-  useTexture.preload(`/textures/${page.back}.jpg`);
-  useTexture.preload(`/textures/rough.jpg`);
-});
+useTexture.preload(`/textures/rough.jpg`);
 
-const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
+const Page = ({
+  number,
+  front,
+  back,
+  page,
+  opened,
+  bookClosed,
+  pagesLength,
+  ...props
+}) => {
   const [picture, picture2, pictureRoughness] = useTexture([
-    `/textures/${front}.jpg`,
-    `/textures/${back}.jpg`,
-    ...(number === 0 || number === pages.length - 1
+    resolveTextureSrc(front),
+    resolveTextureSrc(back),
+    ...(number === 0 || number === pagesLength - 1
       ? [`/textures/rough.jpg`]
       : []),
   ]);
@@ -140,7 +145,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
       new MeshStandardMaterial({
         color: whiteColor,
         map: picture2,
-        ...(number === pages.length - 1
+        ...(number === pagesLength - 1
           ? {
               roughnessMap: pictureRoughness,
             }
@@ -264,7 +269,15 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
 
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
+  const pages = useAtomValue(pagesAtom);
   const [delayedPage, setDelayedPage] = useState(page);
+
+  useEffect(() => {
+    pages.forEach((p) => {
+      useTexture.preload(resolveTextureSrc(p.front));
+      useTexture.preload(resolveTextureSrc(p.back));
+    });
+  }, [pages]);
 
   useEffect(() => {
     let timeout;
@@ -303,6 +316,7 @@ export const Book = ({ ...props }) => {
           number={index}
           opened={delayedPage > index}
           bookClosed={delayedPage === 0 || delayedPage === pages.length}
+          pagesLength={pages.length}
           {...pageData}
         />
       ))}
