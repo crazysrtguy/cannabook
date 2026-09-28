@@ -3,24 +3,10 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useGoonifyFeed } from "../hooks/useGoonifyFeed";
 
-const staticPictures = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-  "13",
-  "14",
-  "15",
-  "16",
-];
+// the old CannaVerse-themed picture set has been retired - the book now
+// opens straight to the cover/back cover and fills in with live goonify
+// generations only (see goonifyPicturesAtom below)
+const staticPictures = [];
 
 // Local curated pages resolve to /textures/<id>.jpg. Live goonify
 // generations arrive as full proxied URLs and are used as-is.
@@ -88,8 +74,9 @@ export const UI = () => {
   return (
     <>
       <main className=" pointer-events-none select-none z-10 fixed  inset-0  flex justify-between flex-col">
-        <div className="pointer-events-auto mt-10 ml-10 flex items-center gap-4">
-          <img className="w-20" src="images/logo.png" />
+        <div className="pointer-events-auto mt-10 ml-10 flex items-center gap-3">
+          <div className="w-9 h-9 bg-[#f2ff4d] rounded-[10px] border-2 border-black -rotate-6" />
+          <span className="disp text-white text-xl">GOONIFY</span>
           <Link
             to="/"
             className="mono text-[11px] tracking-wide text-[#f2ff4d]/80 border border-[#f2ff4d]/30 rounded-full px-3 py-2 hover:text-[#f2ff4d] hover:border-[#f2ff4d] transition-colors"
