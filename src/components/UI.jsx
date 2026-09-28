@@ -87,21 +87,24 @@ export const UI = () => {
   return (
     <>
       <main className=" pointer-events-none select-none z-10 fixed  inset-0  flex justify-between flex-col">
-        <a
-          className="pointer-events-auto mt-10 ml-10"
-          href="https://t.me/+v5_6cI2X8Lw3ZDBh"
-        >
+        <div className="pointer-events-auto mt-10 ml-10 flex items-center gap-4">
           <img className="w-20" src="images/logo.png" />
-        </a>
+          <a
+            href="https://goonify.fun"
+            className="mono text-[11px] tracking-wide text-[#f2ff4d]/80 border border-[#f2ff4d]/30 rounded-full px-3 py-2 hover:text-[#f2ff4d] hover:border-[#f2ff4d] transition-colors"
+          >
+            ← GOONIFY.FUN
+          </a>
+        </div>
         <div className="w-full overflow-auto pointer-events-auto flex justify-center">
           <div className="overflow-auto flex items-center gap-4 max-w-full p-10">
             {[...pages].map((_, index) => (
               <button
                 key={index}
-                className={`border-transparent hover:border-white transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
+                className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
                   index === page
-                    ? "bg-white/90 text-black"
-                    : "bg-black/30 text-white"
+                    ? "bg-[#f2ff4d] text-black"
+                    : "bg-black/40 text-white"
                 }`}
                 onClick={() => setPage(index)}
               >
@@ -109,10 +112,10 @@ export const UI = () => {
               </button>
             ))}
             <button
-              className={`border-transparent hover:border-white transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
+              className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
                 page === pages.length
-                  ? "bg-white/90 text-black"
-                  : "bg-black/30 text-white"
+                  ? "bg-[#f2ff4d] text-black"
+                  : "bg-black/40 text-white"
               }`}
               onClick={() => setPage(pages.length)}
             >
@@ -125,32 +128,33 @@ export const UI = () => {
       <div className="fixed inset-0 flex items-center -rotate-2 select-none">
         <div className="relative">
           <div className="bg-white/0  animate-horizontal-scroll flex items-center gap-8 w-max px-8">
-            <h1 className="shrink-0 text-white text-10xl font-black ">
-CannaVerse           </h1>
-            <h2 className="shrink-0 text-white text-8xl italic font-light">
-  META          </h2>
-            <h2 className="shrink-0 text-white text-12xl font-bold">
-Community
+            <h1 className="shrink-0 disp text-[#f2ff4d] text-10xl font-black ">
+THE           </h1>
+            <h2 className="shrink-0 disp text-white text-12xl font-bold">
+GOONING
+            </h2>
+            <h2 className="shrink-0 disp text-[#f2ff4d] text-13xl font-bold">
+BIBLE
             </h2>
             <h2 className="shrink-0 text-transparent text-12xl font-bold italic outline-text">
-is            </h2>
-            <h2 className="shrink-0 text-white text-9xl font-medium">
-              ON
+·            </h2>
+            <h2 className="shrink-0 disp text-white text-9xl font-medium">
+              EVERY
             </h2>
-            <h2 className="shrink-0 text-white text-9xl font-extralight italic">
-              the
+            <h2 className="shrink-0 disp text-white text-9xl font-extralight italic">
+              generation
             </h2>
-            <h2 className="shrink-0 text-white text-13xl font-bold">
-              way to
+            <h2 className="shrink-0 disp text-white text-13xl font-bold">
+              lives
             </h2>
             <h2 className="shrink-0 text-transparent text-13xl font-bold outline-text italic">
-           Take Over </h2>
+           forever </h2>
           </div>
           <div className="absolute top 50 left-0 bg-white/0 animate-horizontal-scroll-2 flex items-center gap-18 px-8 w-max">
-            <h2 className="shrink-0 text-white text-10xl font-black ">
-         SOLANA      </h2>
+            <h2 className="shrink-0 disp text-[#f2ff4d] text-10xl font-black ">
+         $GOONIFY      </h2>
 
-           
+
           </div>
         </div>
       </div>

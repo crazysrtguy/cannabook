@@ -68,20 +68,28 @@ pageGeometry.setAttribute(
 );
 
 const whiteColor = new Color("white");
-const emissiveColor = new Color("orange");
+const emissiveColor = new Color("#f2ff4d");
+const gildedColor = new Color("#d4af00");
 
+// gilded page edges - a bible-book detail
 const pageMaterials = [
   new MeshStandardMaterial({
-    color: whiteColor,
+    color: gildedColor,
+    metalness: 0.6,
+    roughness: 0.35,
   }),
   new MeshStandardMaterial({
     color: "#111",
   }),
   new MeshStandardMaterial({
-    color: whiteColor,
+    color: gildedColor,
+    metalness: 0.6,
+    roughness: 0.35,
   }),
   new MeshStandardMaterial({
-    color: whiteColor,
+    color: gildedColor,
+    metalness: 0.6,
+    roughness: 0.35,
   }),
 ];
 

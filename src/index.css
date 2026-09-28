@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,13 +6,22 @@
 #root {
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(#47ce52, #232323 80%);
+  background: radial-gradient(circle at 50% 15%, #3d3a12 0%, #0a0a0c 70%);
 }
 
 body {
   margin: 0;
+  font-family: "Space Grotesk", sans-serif;
 }
 
 .outline-text {
-  -webkit-text-stroke: 1px white;
+  -webkit-text-stroke: 1px #f2ff4d;
+}
+
+.disp {
+  font-family: "Archivo Black", sans-serif;
+}
+
+.mono {
+  font-family: "Space Mono", monospace;
 }
