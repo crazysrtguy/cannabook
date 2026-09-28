@@ -1,10 +1,25 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useGoonifyFeed } from "../hooks/useGoonifyFeed";
+import { usePumpfunStats } from "../hooks/usePumpfunStats";
 
 const CA = "FovbmorCWsm1PXxwvje7iSohTVRuM6WeqytknZpGpump";
 const TELEGRAM_URL = "https://t.me/+AS85ZfdRxFE1NzZh";
 const X_URL = "https://x.com/i/communities/1947119751609659547";
 const GOONIFICATOR_URL = "https://goonify.fun";
+
+function formatCompact(n) {
+  if (n == null || Number.isNaN(n)) return "—";
+  if (n < 1000) return String(Math.round(n));
+  const units = ["", "K", "M", "B"];
+  let unitIndex = 0;
+  let value = n;
+  while (value >= 1000 && unitIndex < units.length - 1) {
+    value /= 1000;
+    unitIndex++;
+  }
+  return `${value.toFixed(1)}${units[unitIndex]}`;
+}
 
 const pageStyles = `
   .landing-root{
@@ -52,6 +67,8 @@ const pageStyles = `
 
 export const Landing = () => {
   const [copyLabel, setCopyLabel] = useState("FovbmorCWsm...ZpGpump");
+  const goonifyImages = useGoonifyFeed();
+  const { holders, marketCap } = usePumpfunStats();
 
   const copyCA = () => {
     if (navigator.clipboard) {
@@ -152,10 +169,10 @@ export const Landing = () => {
       {/* stat strip */}
       <div className="wrap grid-4" style={{ position: "relative", zIndex: 10, marginTop: 12, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
         {[
-          ["12.4K", "GOONIFICATIONS"],
-          ["3.1K", "HOLDERS"],
+          [formatCompact(goonifyImages.length), "GOONIFICATIONS"],
+          [formatCompact(holders), "HOLDERS"],
           ["24/7", "GOONING"],
-          ["1", "COMMUNITY MAG"],
+          [marketCap == null ? "—" : `$${formatCompact(marketCap)}`, "MARKETCAP"],
         ].map(([value, label]) => (
           <div key={label} className="card-hover" style={{ background: "var(--bg-raised)", border: "1px solid var(--line)", borderRadius: 14, padding: 20 }}>
             <div className="disp" style={{ fontSize: 28, color: "var(--yellow)" }}>{value}</div>
