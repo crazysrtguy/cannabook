@@ -8,6 +8,7 @@ const DEFAULT_STATS = {
   bundlers: null,
   devHolding: null,
   marketCap: null,
+  athMarketCap: null,
   trades24h: null,
   priceChangeH24: null,
   pairAddress: null,
@@ -15,9 +16,9 @@ const DEFAULT_STATS = {
 };
 
 // Polls cannabook's own /api/pumpfun/stats proxy for live $GOONIFY stats
-// (holders, sniper/bundler breakdown, dev-holding flag from pump.fun; market
-// cap, 24h trades, 24h price change and the DexScreener pair id for the
-// chart embed, from DexScreener).
+// (holders, sniper/bundler breakdown, dev-holding flag, market cap and
+// all-time-high market cap from pump.fun; 24h trades, 24h price change and
+// the DexScreener pair id for the chart, from DexScreener).
 export function usePumpfunStats() {
   const [stats, setStats] = useState(DEFAULT_STATS);
   const cancelledRef = useRef(false);

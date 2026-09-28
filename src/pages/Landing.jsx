@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { BondingChart } from "../components/BondingChart";
 import { useGoonifyFeed } from "../hooks/useGoonifyFeed";
 import { usePumpfunStats } from "../hooks/usePumpfunStats";
 
@@ -94,13 +95,10 @@ const pageStyles = `
   .landing-root .upzone{transition:border-color .15s,background .15s}
   .landing-root .upzone:hover{border-color:var(--yellow);background:var(--yellow-soft)}
   .landing-root .wrap{max-width:1240px;margin:0 auto;padding-left:24px;padding-right:24px}
-  .landing-root .dex-embed{position:relative;width:100%;padding-bottom:56%;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
-  .landing-root .dex-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   @media (max-width:900px){
     .landing-root .grid-4{grid-template-columns:repeat(2,1fr) !important}
     .landing-root .grid-3{grid-template-columns:1fr !important}
     .landing-root .hero{flex-direction:column}
-    .landing-root .dex-embed{padding-bottom:130%}
   }
 `;
 
@@ -116,7 +114,7 @@ export const Landing = () => {
     clampedGalleryPage * GALLERY_PAGE_SIZE,
     clampedGalleryPage * GALLERY_PAGE_SIZE + GALLERY_PAGE_SIZE
   );
-  const { holders, marketCap, pairAddress, chainId } = usePumpfunStats();
+  const { holders, marketCap, athMarketCap, pairAddress } = usePumpfunStats();
 
   const copyCA = () => {
     if (navigator.clipboard) {
@@ -300,22 +298,17 @@ export const Landing = () => {
         )}
       </div>
 
-      {/* live chart */}
+      {/* bonding progress chart */}
       <div className="wrap" style={{ position: "relative", zIndex: 10, padding: "0 24px 40px" }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 20 }}>
-          <h2 className="disp" style={{ fontSize: "clamp(22px,2.6vw,32px)", margin: 0 }}>LIVE CHART</h2>
+          <h2 className="disp" style={{ fontSize: "clamp(22px,2.6vw,32px)", margin: 0 }}>BONDING WATCH</h2>
           <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
-          <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>DEXSCREENER</span>
+          <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>PUMP.FUN</span>
         </div>
         {pairAddress ? (
-          <div className="dex-embed">
-            <iframe
-              title="$GOONIFY chart"
-              src={`https://dexscreener.com/${chainId ?? "solana"}/${pairAddress}?embed=1&loadChartSettings=0&trades=0&tabs=0&info=0&chartLeftToolbar=0&theme=dark&chartTheme=dark&chartStyle=1&chartType=usd&interval=15`}
-            />
-          </div>
+          <BondingChart poolAddress={pairAddress} tokenAddress={CA} />
         ) : (
-          <div className="dex-embed" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-card)" }}>
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--line)", borderRadius: 16, padding: "80px 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>loading chart…</span>
           </div>
         )}
@@ -326,7 +319,7 @@ export const Landing = () => {
         {[
           { value: formatCompact(goonifyImages.length), label: "GOONIFICATIONS" },
           { value: formatCompact(holders), label: "HOLDERS" },
-          { value: "24/7", label: "GOONING" },
+          { value: athMarketCap == null ? "—" : `$${formatCompact(athMarketCap)}`, label: "ATH" },
           { value: marketCap == null ? "—" : `$${formatCompact(marketCap)}`, label: "MARKETCAP" },
         ].map(({ value, label }) => (
           <div key={label} className="card-hover" style={{ background: "var(--bg-raised)", border: "1px solid var(--line)", borderRadius: 14, padding: 20 }}>
