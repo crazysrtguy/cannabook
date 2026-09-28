@@ -74,22 +74,22 @@ export const UI = () => {
   return (
     <>
       <main className=" pointer-events-none select-none z-10 fixed  inset-0  flex justify-between flex-col">
-        <div className="pointer-events-auto mt-10 ml-10 flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#f2ff4d] rounded-[10px] border-2 border-black -rotate-6" />
-          <span className="disp text-white text-xl">GOONIFY</span>
+        <div className="pointer-events-auto mt-4 ml-4 sm:mt-10 sm:ml-10 flex items-center gap-2 sm:gap-3">
+          <div className="w-7 h-7 sm:w-9 sm:h-9 bg-[#f2ff4d] rounded-[10px] border-2 border-black -rotate-6" />
+          <span className="disp text-white text-base sm:text-xl">GOONIFY</span>
           <Link
             to="/"
-            className="mono text-[11px] tracking-wide text-[#f2ff4d]/80 border border-[#f2ff4d]/30 rounded-full px-3 py-2 hover:text-[#f2ff4d] hover:border-[#f2ff4d] transition-colors"
+            className="mono text-[10px] sm:text-[11px] tracking-wide text-[#f2ff4d]/80 border border-[#f2ff4d]/30 rounded-full px-2.5 py-1.5 sm:px-3 sm:py-2 hover:text-[#f2ff4d] hover:border-[#f2ff4d] transition-colors"
           >
             ← GOONIFY.FUN
           </Link>
         </div>
         <div className="w-full overflow-auto pointer-events-auto flex justify-center">
-          <div className="overflow-auto flex items-center gap-4 max-w-full p-10">
+          <div className="overflow-auto flex items-center gap-2 sm:gap-4 max-w-full p-4 sm:p-10">
             {[...pages].map((_, index) => (
               <button
                 key={index}
-                className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
+                className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300 px-3 py-2 sm:px-4 sm:py-3 rounded-full text-sm sm:text-lg uppercase shrink-0 border ${
                   index === page
                     ? "bg-[#f2ff4d] text-black"
                     : "bg-black/40 text-white"
@@ -100,7 +100,7 @@ export const UI = () => {
               </button>
             ))}
             <button
-              className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300  px-4 py-3 rounded-full  text-lg uppercase shrink-0 border ${
+              className={`border-transparent hover:border-[#f2ff4d] transition-all duration-300 px-3 py-2 sm:px-4 sm:py-3 rounded-full text-sm sm:text-lg uppercase shrink-0 border ${
                 page === pages.length
                   ? "bg-[#f2ff4d] text-black"
                   : "bg-black/40 text-white"
@@ -113,10 +113,10 @@ export const UI = () => {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-10 flex items-center -rotate-2 select-none pointer-events-none">
+      <div className="fixed inset-x-0 bottom-24 sm:bottom-32 flex items-center -rotate-2 select-none pointer-events-none -z-10">
         <div className="relative">
           <div className="bg-white/0 animate-horizontal-scroll-2 flex items-center gap-18 px-8 w-max">
-            <h2 className="shrink-0 disp text-[#f2ff4d] text-10xl font-black ">
+            <h2 className="shrink-0 disp text-[#f2ff4d] text-6xl sm:text-10xl font-black ">
          $GOONIFY      </h2>
 
 

@@ -304,9 +304,12 @@ const Page = ({
 // is what causes the slow initial load and the GPU-starved/glitchy pages
 // once you flip deep into the book. Only the first EAGER_PAGE_COUNT pages and
 // pages within LAZY_WINDOW of the current page are actually mounted/loaded;
-// the rest are skipped until they're approached.
-const EAGER_PAGE_COUNT = 10;
-const LAZY_WINDOW = 6;
+// the rest are skipped until they're approached. Phones have far less
+// texture memory/fill-rate than desktop GPUs, so the window is smaller there.
+const isSmallScreen =
+  typeof window !== "undefined" && window.matchMedia("(max-width: 700px)").matches;
+const EAGER_PAGE_COUNT = isSmallScreen ? 6 : 10;
+const LAZY_WINDOW = isSmallScreen ? 3 : 6;
 
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
