@@ -21,10 +21,10 @@ function formatCompact(n) {
   return `${value.toFixed(1)}${units[unitIndex]}`;
 }
 
-function formatSignedPct(n) {
-  if (n == null || Number.isNaN(n)) return "—";
-  const sign = n > 0 ? "+" : "";
-  return `${sign}${n.toFixed(1)}%`;
+function buildShareUrl(imageSrc) {
+  const absoluteImageUrl = new URL(imageSrc, window.location.origin).toString();
+  const text = "I just got goonified 😭 $GOONIFY";
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(absoluteImageUrl)}`;
 }
 
 const pageStyles = `
@@ -86,16 +86,7 @@ export const Landing = () => {
     clampedGalleryPage * GALLERY_PAGE_SIZE,
     clampedGalleryPage * GALLERY_PAGE_SIZE + GALLERY_PAGE_SIZE
   );
-  const {
-    holders,
-    marketCap,
-    snipers,
-    bundlers,
-    trades24h,
-    priceChangeH24,
-    pairAddress,
-    chainId,
-  } = usePumpfunStats();
+  const { holders, marketCap, pairAddress, chainId } = usePumpfunStats();
 
   const copyCA = () => {
     if (navigator.clipboard) {
@@ -138,8 +129,8 @@ export const Landing = () => {
           <span className="disp" style={{ fontSize: 22 }}>GOONIFY</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <a href="#how" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>HOW IT WORKS</a>
           <a href="#gallery" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>GALLERY</a>
+          <a href="#how" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>HOW IT WORKS</a>
           <Link to="/bible" className="mono" style={{ fontSize: 13, color: "var(--yellow)" }}>THE GOONING BIBLE</Link>
           <a href="#community" className="mono" style={{ fontSize: 13, color: "var(--muted)" }}>COMMUNITY</a>
         </div>
@@ -193,39 +184,89 @@ export const Landing = () => {
         </div>
       </div>
 
-      {/* stat strip */}
-      <div className="wrap grid-4" style={{ position: "relative", zIndex: 10, marginTop: 12, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
-        {[
-          { value: formatCompact(goonifyImages.length), label: "GOONIFICATIONS" },
-          { value: formatCompact(holders), label: "HOLDERS" },
-          { value: "24/7", label: "GOONING" },
-          { value: marketCap == null ? "—" : `$${formatCompact(marketCap)}`, label: "MARKETCAP" },
-          { value: formatCompact(trades24h), label: "24H TRADES" },
-          {
-            value: formatSignedPct(priceChangeH24),
-            label: "24H CHANGE",
-            color:
-              priceChangeH24 == null
-                ? "var(--yellow)"
-                : priceChangeH24 >= 0
-                ? "var(--yellow)"
-                : "var(--hot)",
-          },
-          { value: formatCompact(snipers), label: "SNIPERS" },
-          { value: formatCompact(bundlers), label: "BUNDLERS" },
-        ].map(({ value, label, color }) => (
-          <div key={label} className="card-hover" style={{ background: "var(--bg-raised)", border: "1px solid var(--line)", borderRadius: 14, padding: 20 }}>
-            <div className="disp" style={{ fontSize: 28, color: color ?? "var(--yellow)" }}>{value}</div>
-            <div className="mono" style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>{label}</div>
+      {/* gallery */}
+      <div id="gallery" className="wrap" style={{ position: "relative", zIndex: 10, padding: "20px 24px 40px" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 44 }}>
+          <h2 className="disp" style={{ fontSize: "clamp(28px,3.4vw,44px)", margin: 0 }}>COMMUNITY GALLERY</h2>
+          <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
+          <span className="mono" style={{ fontSize: 12, color: "var(--yellow)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--yellow)", animation: "gb-pulse 1.4s ease-in-out infinite" }} />
+            LIVE
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", background: "var(--bg-card)", border: "1px solid var(--yellow)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
+          <div>
+            <div className="disp" style={{ fontSize: 15, color: "var(--yellow)", marginBottom: 4 }}>📖 THE GOONING BIBLE</div>
+            <p className="mono" style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>a living 3D book — every public goonification lands as a new page here and in the gallery below, automatically, gilded page edges and all.</p>
           </div>
-        ))}
+          <Link to="/bible" className="disp btn-primary" style={{ background: "var(--yellow)", color: "var(--ink)", padding: "14px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13, whiteSpace: "nowrap", boxShadow: "4px 4px 0 #000" }}>OPEN THE BIBLE →</Link>
+        </div>
+
+        {galleryItems.length === 0 ? (
+          <div style={{ border: "1px dashed var(--line)", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
+            <p className="mono" style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>no goonifications yet — be the first one in the gallery.</p>
+            <a href="#goonificator" className="disp btn-primary" style={{ display: "inline-block", marginTop: 16, background: "var(--yellow)", color: "var(--ink)", padding: "12px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13 }}>GOONIFY ME →</a>
+          </div>
+        ) : (
+          <>
+            <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+              {galleryItems.map((src, i) => (
+                <div
+                  key={`${clampedGalleryPage}-${i}-${src}`}
+                  className="card-hover"
+                  style={{ position: "relative", aspectRatio: "1", borderRadius: 16, border: "1px solid var(--line)", overflow: "hidden", background: "var(--bg-card)" }}
+                >
+                  <a href={src} target="_blank" rel="noopener noreferrer" style={{ display: "block", width: "100%", height: "100%" }}>
+                    <img
+                      src={src}
+                      alt="goonified generation"
+                      loading="lazy"
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    />
+                  </a>
+                  <a
+                    href={buildShareUrl(src)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Post to X"
+                    title="Post to X"
+                    style={{ position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: 8, background: "rgba(10,10,12,0.75)", border: "1px solid var(--yellow)", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--yellow)"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.6L4.4 22H1.3l8.1-9.3L1 2h7.1l4.9 6.1L18.9 2z" /></svg>
+                  </a>
+                </div>
+              ))}
+            </div>
+
+            {galleryPageCount > 1 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 24 }}>
+                <button
+                  onClick={() => setGalleryPage((p) => Math.max(0, p - 1))}
+                  disabled={clampedGalleryPage === 0}
+                  className="mono btn-ghost"
+                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage === 0 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage === 0 ? "default" : "pointer", fontSize: 12 }}
+                >
+                  ← PREV
+                </button>
+                <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>
+                  PAGE {clampedGalleryPage + 1} / {galleryPageCount}
+                </span>
+                <button
+                  onClick={() => setGalleryPage((p) => Math.min(galleryPageCount - 1, p + 1))}
+                  disabled={clampedGalleryPage >= galleryPageCount - 1}
+                  className="mono btn-ghost"
+                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage >= galleryPageCount - 1 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage >= galleryPageCount - 1 ? "default" : "pointer", fontSize: 12 }}
+                >
+                  NEXT →
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-      <p className="wrap mono" style={{ position: "relative", zIndex: 10, fontSize: 10, color: "var(--muted)", marginTop: 10 }}>
-        holders, snipers &amp; bundlers from pump.fun · trades, change &amp; market cap from DexScreener · refreshes every 30s
-      </p>
 
       {/* live chart */}
-      <div className="wrap" style={{ position: "relative", zIndex: 10, marginTop: 40 }}>
+      <div className="wrap" style={{ position: "relative", zIndex: 10, padding: "0 24px 40px" }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 20 }}>
           <h2 className="disp" style={{ fontSize: "clamp(22px,2.6vw,32px)", margin: 0 }}>LIVE CHART</h2>
           <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
@@ -243,6 +284,21 @@ export const Landing = () => {
             <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>loading chart…</span>
           </div>
         )}
+      </div>
+
+      {/* stat strip */}
+      <div className="wrap grid-4" style={{ position: "relative", zIndex: 10, marginTop: 12, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+        {[
+          { value: formatCompact(goonifyImages.length), label: "GOONIFICATIONS" },
+          { value: formatCompact(holders), label: "HOLDERS" },
+          { value: "24/7", label: "GOONING" },
+          { value: marketCap == null ? "—" : `$${formatCompact(marketCap)}`, label: "MARKETCAP" },
+        ].map(({ value, label }) => (
+          <div key={label} className="card-hover" style={{ background: "var(--bg-raised)", border: "1px solid var(--line)", borderRadius: 14, padding: 20 }}>
+            <div className="disp" style={{ fontSize: 28, color: "var(--yellow)" }}>{value}</div>
+            <div className="mono" style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>{label}</div>
+          </div>
+        ))}
       </div>
 
       {/* how it works */}
@@ -281,78 +337,6 @@ export const Landing = () => {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* gallery */}
-      <div id="gallery" className="wrap" style={{ position: "relative", zIndex: 10, padding: "80px 24px 40px" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 44 }}>
-          <h2 className="disp" style={{ fontSize: "clamp(28px,3.4vw,44px)", margin: 0 }}>COMMUNITY GALLERY</h2>
-          <div style={{ flex: 1, height: 2, background: "var(--line)" }} />
-          <span className="mono" style={{ fontSize: 12, color: "var(--yellow)", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--yellow)", animation: "gb-pulse 1.4s ease-in-out infinite" }} />
-            LIVE
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", background: "var(--bg-card)", border: "1px solid var(--yellow)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
-          <div>
-            <div className="disp" style={{ fontSize: 15, color: "var(--yellow)", marginBottom: 4 }}>📖 THE GOONING BIBLE</div>
-            <p className="mono" style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>a living 3D book — every public goonification lands as a new page here and in the gallery below, automatically, gilded page edges and all.</p>
-          </div>
-          <Link to="/bible" className="disp btn-primary" style={{ background: "var(--yellow)", color: "var(--ink)", padding: "14px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13, whiteSpace: "nowrap", boxShadow: "4px 4px 0 #000" }}>OPEN THE BIBLE →</Link>
-        </div>
-
-        {galleryItems.length === 0 ? (
-          <div style={{ border: "1px dashed var(--line)", borderRadius: 16, padding: "48px 24px", textAlign: "center" }}>
-            <p className="mono" style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>no goonifications yet — be the first one in the gallery.</p>
-            <a href="#goonificator" className="disp btn-primary" style={{ display: "inline-block", marginTop: 16, background: "var(--yellow)", color: "var(--ink)", padding: "12px 22px", borderRadius: 10, border: "2px solid #000", fontSize: 13 }}>GOONIFY ME →</a>
-          </div>
-        ) : (
-          <>
-            <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
-              {galleryItems.map((src, i) => (
-                <a
-                  key={`${clampedGalleryPage}-${i}-${src}`}
-                  href={src}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="card-hover"
-                  style={{ display: "block", aspectRatio: "1", borderRadius: 16, border: "1px solid var(--line)", overflow: "hidden", background: "var(--bg-card)" }}
-                >
-                  <img
-                    src={src}
-                    alt="goonified generation"
-                    loading="lazy"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                </a>
-              ))}
-            </div>
-
-            {galleryPageCount > 1 && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 24 }}>
-                <button
-                  onClick={() => setGalleryPage((p) => Math.max(0, p - 1))}
-                  disabled={clampedGalleryPage === 0}
-                  className="mono btn-ghost"
-                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage === 0 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage === 0 ? "default" : "pointer", fontSize: 12 }}
-                >
-                  ← PREV
-                </button>
-                <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>
-                  PAGE {clampedGalleryPage + 1} / {galleryPageCount}
-                </span>
-                <button
-                  onClick={() => setGalleryPage((p) => Math.min(galleryPageCount - 1, p + 1))}
-                  disabled={clampedGalleryPage >= galleryPageCount - 1}
-                  className="mono btn-ghost"
-                  style={{ background: "transparent", border: "1px solid var(--line)", borderRadius: 10, padding: "10px 16px", color: clampedGalleryPage >= galleryPageCount - 1 ? "var(--line)" : "var(--paper)", cursor: clampedGalleryPage >= galleryPageCount - 1 ? "default" : "pointer", fontSize: 12 }}
-                >
-                  NEXT →
-                </button>
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       {/* CTA band */}
