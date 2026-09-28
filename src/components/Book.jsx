@@ -2,7 +2,7 @@ import { useCursor, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useAtom, useAtomValue } from "jotai";
 import { easing } from "maath";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bone,
   BoxGeometry,
@@ -357,15 +357,19 @@ export const Book = ({ ...props }) => {
           return null;
         }
         return (
-          <Page
-            key={index}
-            page={delayedPage}
-            number={index}
-            opened={delayedPage > index}
-            bookClosed={delayedPage === 0 || delayedPage === pages.length}
-            pagesLength={pages.length}
-            {...pageData}
-          />
+          // Each page gets its own Suspense boundary so a not-yet-loaded
+          // page waits on its own instead of blanking the whole book (which
+          // otherwise happens on every turn once pages lazy-load).
+          <Suspense key={index} fallback={null}>
+            <Page
+              page={delayedPage}
+              number={index}
+              opened={delayedPage > index}
+              bookClosed={delayedPage === 0 || delayedPage === pages.length}
+              pagesLength={pages.length}
+              {...pageData}
+            />
+          </Suspense>
         );
       })}
     </group>
