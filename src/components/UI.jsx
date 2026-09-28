@@ -1,5 +1,6 @@
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useGoonifyFeed } from "../hooks/useGoonifyFeed";
 
 const staticPictures = [
@@ -89,12 +90,12 @@ export const UI = () => {
       <main className=" pointer-events-none select-none z-10 fixed  inset-0  flex justify-between flex-col">
         <div className="pointer-events-auto mt-10 ml-10 flex items-center gap-4">
           <img className="w-20" src="images/logo.png" />
-          <a
-            href="https://goonify.fun"
+          <Link
+            to="/"
             className="mono text-[11px] tracking-wide text-[#f2ff4d]/80 border border-[#f2ff4d]/30 rounded-full px-3 py-2 hover:text-[#f2ff4d] hover:border-[#f2ff4d] transition-colors"
           >
             ← GOONIFY.FUN
-          </a>
+          </Link>
         </div>
         <div className="w-full overflow-auto pointer-events-auto flex justify-center">
           <div className="overflow-auto flex items-center gap-4 max-w-full p-10">
