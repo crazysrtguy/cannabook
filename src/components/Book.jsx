@@ -299,17 +299,28 @@ const Page = ({
   );
 };
 
+// With 200+ generations the book can have 100+ pages - mounting a full
+// SkinnedMesh (31 bones) with full-res textures for every single one at once
+// is what causes the slow initial load and the GPU-starved/glitchy pages
+// once you flip deep into the book. Only the first EAGER_PAGE_COUNT pages and
+// pages within LAZY_WINDOW of the current page are actually mounted/loaded;
+// the rest are skipped until they're approached.
+const EAGER_PAGE_COUNT = 10;
+const LAZY_WINDOW = 6;
+
 export const Book = ({ ...props }) => {
   const [page] = useAtom(pageAtom);
   const pages = useAtomValue(pagesAtom);
   const [delayedPage, setDelayedPage] = useState(page);
 
   useEffect(() => {
-    pages.forEach((p) => {
-      useTexture.preload(resolveTextureSrc(p.front));
-      useTexture.preload(resolveTextureSrc(p.back));
+    pages.forEach((p, index) => {
+      if (index < EAGER_PAGE_COUNT || Math.abs(index - delayedPage) <= LAZY_WINDOW) {
+        useTexture.preload(resolveTextureSrc(p.front));
+        useTexture.preload(resolveTextureSrc(p.back));
+      }
     });
-  }, [pages]);
+  }, [pages, delayedPage]);
 
   useEffect(() => {
     let timeout;
@@ -341,17 +352,22 @@ export const Book = ({ ...props }) => {
 
   return (
     <group {...props} rotation-y={-Math.PI / 2}>
-      {[...pages].map((pageData, index) => (
-        <Page
-          key={index}
-          page={delayedPage}
-          number={index}
-          opened={delayedPage > index}
-          bookClosed={delayedPage === 0 || delayedPage === pages.length}
-          pagesLength={pages.length}
-          {...pageData}
-        />
-      ))}
+      {[...pages].map((pageData, index) => {
+        if (index >= EAGER_PAGE_COUNT && Math.abs(index - delayedPage) > LAZY_WINDOW) {
+          return null;
+        }
+        return (
+          <Page
+            key={index}
+            page={delayedPage}
+            number={index}
+            opened={delayedPage > index}
+            bookClosed={delayedPage === 0 || delayedPage === pages.length}
+            pagesLength={pages.length}
+            {...pageData}
+          />
+        );
+      })}
     </group>
   );
 };

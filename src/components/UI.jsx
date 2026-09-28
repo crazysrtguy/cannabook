@@ -113,7 +113,7 @@ export const UI = () => {
         </div>
       </main>
 
-      <div className="fixed inset-0 flex items-center -rotate-2 select-none">
+      <div className="fixed inset-x-0 bottom-10 flex items-center -rotate-2 select-none pointer-events-none">
         <div className="relative">
           <div className="bg-white/0 animate-horizontal-scroll-2 flex items-center gap-18 px-8 w-max">
             <h2 className="shrink-0 disp text-[#f2ff4d] text-10xl font-black ">
