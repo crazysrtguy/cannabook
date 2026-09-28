@@ -17,6 +17,7 @@ import {
   Vector3,
 } from "three";
 import { degToRad } from "three/src/math/MathUtils.js";
+import { createAnimatedCoverCanvas, drawGooningBibleCover } from "./coverArt";
 import { pageAtom, pagesAtom, resolveTextureSrc } from "./UI";
 
 const easingFactor = 0.5; // Controls the speed of the easing
@@ -119,6 +120,20 @@ const Page = ({
 
   const skinnedMeshRef = useRef();
 
+  const isFrontCoverPage = number === 0;
+  const isBackCoverPage = number === pagesLength - 1;
+
+  // Front/back covers get a live animated canvas texture instead of the
+  // static cover jpgs, redrawn every frame below.
+  const frontCoverCanvas = useMemo(
+    () => (isFrontCoverPage ? createAnimatedCoverCanvas() : null),
+    []
+  );
+  const backCoverCanvas = useMemo(
+    () => (isBackCoverPage ? createAnimatedCoverCanvas() : null),
+    []
+  );
+
   const manualSkinnedMesh = useMemo(() => {
     const bones = [];
     for (let i = 0; i <= PAGE_SEGMENTS; i++) {
@@ -139,7 +154,7 @@ const Page = ({
       ...pageMaterials,
       new MeshStandardMaterial({
         color: whiteColor,
-        map: picture,
+        map: frontCoverCanvas ? frontCoverCanvas.texture : picture,
         ...(number === 0
           ? {
               roughnessMap: pictureRoughness,
@@ -152,7 +167,7 @@ const Page = ({
       }),
       new MeshStandardMaterial({
         color: whiteColor,
-        map: picture2,
+        map: backCoverCanvas ? backCoverCanvas.texture : picture2,
         ...(number === pagesLength - 1
           ? {
               roughnessMap: pictureRoughness,
@@ -175,7 +190,16 @@ const Page = ({
 
   // useHelper(skinnedMeshRef, SkeletonHelper, "red");
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    if (frontCoverCanvas) {
+      drawGooningBibleCover(frontCoverCanvas, state.clock.elapsedTime, true);
+      frontCoverCanvas.texture.needsUpdate = true;
+    }
+    if (backCoverCanvas) {
+      drawGooningBibleCover(backCoverCanvas, state.clock.elapsedTime, false);
+      backCoverCanvas.texture.needsUpdate = true;
+    }
+
     if (!skinnedMeshRef.current) {
       return;
     }
